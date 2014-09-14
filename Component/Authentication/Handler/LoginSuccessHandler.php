@@ -78,15 +78,16 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
         if ($this->routeReferer['enabled']) {
             $session = $request->getSession();
 
-            if ($session->has('referer')) {
-                if ($session->get('referer') !== null && $session->get('referer') !== '') {
-                    $response = new RedirectResponse($session->get('referer'));
+            $session_key="'_security.'.$token->providerKey.'.target_path'"
+            if ($session->has($session_key)) {
+                if ($session->get($session_key) !== null && $session->get($session_key) !== '') {
+                    $response = new RedirectResponse($session->get($session_key));
                 } else {
-                    $response = new RedirectResponse($request->getBasePath() . '/');
+                    $response = new RedirectResponse($request->getBaseUrl() . '/');
                 }
             } else {
                 // if no referer then go to homepage
-                $response = new RedirectResponse($request->getBasePath() . '/');
+                $response = new RedirectResponse($request->getBaseUrl() . '/');
             }
 
             if ($request->isXmlHttpRequest() || $request->request->get('_format') === 'json') {
@@ -98,8 +99,8 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
                 $response = new Response(
                     json_encode(
                         array(
-                            'status' => 'failed',
-                            'errors' => array()
+                            'status' => 'sucess'
+                            
                         )
                     )
                 );
