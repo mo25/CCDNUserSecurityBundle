@@ -78,7 +78,7 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
         if ($this->routeReferer['enabled']) {
             $session = $request->getSession();
 
-            $session_key='_security.'.$token->providerKey.'.target_path';
+            $session_key='_security.'.$token->getProviderKey().'.target_path';
             if ($session->has($session_key)) {
                 if ($session->get($session_key) !== null && $session->get($session_key) !== '') {
                     $response = new RedirectResponse($session->get($session_key));
