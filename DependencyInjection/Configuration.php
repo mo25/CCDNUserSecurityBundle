@@ -52,8 +52,8 @@ class Configuration implements ConfigurationInterface
         $this->addComponentSection($rootNode);
 
         // Configuration stuff.
-        $this->addRouteRefererSection($rootNode);
         $this->addLoginShieldSection($rootNode);
+        $this->addRouteRefererSection($rootNode);
 
         return $treeBuilder;
     }
@@ -219,6 +219,27 @@ class Configuration implements ConfigurationInterface
         return $this;
     }
 
+     /**
+      *
+      * @access private
+      * @param  \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition $node
+      * @return \CCDNUser\SecurityBundle\DependencyInjection\Configuration
+      */
+     private function addRouteRefererSection(ArrayNodeDefinition $node)
+     {
+         $node
+             ->children()
+                 ->arrayNode('route_referer')
+                    ->canBeUnset()
+                     ->ignoreExtraKeys()
+                    // we just skip that array!
+                 ->end()
+             ->end()
+         ;
+
+         return $this;
+     }
+
     /**
      *
      * @access private
@@ -310,6 +331,13 @@ class Configuration implements ConfigurationInterface
                                         ->scalarNode('class')->defaultValue('CCDNUser\SecurityBundle\Component\Listener\RouteRefererListener')->end()
                                     ->end()
                                 ->end()
+                                ->arrayNode('defer_login_listener')
+                                    ->addDefaultsIfNotSet()
+                                    ->canBeUnset()
+                                    ->children()
+                                        ->scalarNode('class')->defaultValue('CCDNUser\SecurityBundle\Component\Listener\DeferLoginListener')->end()
+                                    ->end()
+                                ->end()
                                 ->arrayNode('blocking_login_listener')
                                     ->addDefaultsIfNotSet()
                                     ->canBeUnset()
@@ -347,33 +375,6 @@ class Configuration implements ConfigurationInterface
      * @param  \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition $node
      * @return \CCDNUser\SecurityBundle\DependencyInjection\Configuration
      */
-    private function addRouteRefererSection(ArrayNodeDefinition $node)
-    {
-        $node
-            ->addDefaultsIfNotSet()
-            ->canBeUnset()
-            ->children()
-                ->arrayNode('route_referer')
-                    ->children()
-                        ->booleanNode('enabled')->defaultFalse()->end()
-                        ->arrayNode('route_ignore_list')
-                            ->prototype('scalar')
-                            ->end()
-                        ->end()
-                    ->end()
-                ->end()
-            ->end()
-        ;
-
-        return $this;
-    }
-
-    /**
-     *
-     * @access private
-     * @param  \Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition $node
-     * @return \CCDNUser\SecurityBundle\DependencyInjection\Configuration
-     */
     private function addLoginShieldSection(ArrayNodeDefinition $node)
     {
         $node
@@ -387,6 +388,7 @@ class Configuration implements ConfigurationInterface
                         ->arrayNode('route_login')
                             ->children()
                                 ->scalarNode('name')->end()
+                                ->scalarNode('path')->end()
                                 ->arrayNode('params')
                                     ->prototype('scalar')
                                     ->end()
